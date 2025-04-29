@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'MiFuentePersonalizada';
+  src: url('./assets/fonts/MiFuente.woff2') format('woff2'),
+       url('./assets/fonts/MiFuente.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html {
+  font-family: 'MiFuentePersonalizada', sans-serif;
+}
+
+body {
+  background-color: #f7f7f7; /* Gris claro */
+}
