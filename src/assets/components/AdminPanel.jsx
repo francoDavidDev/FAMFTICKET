@@ -1,4 +1,5 @@
-// src/components/AdminPanel.jsx
+
+// ✅ AdminPanel.jsx
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -12,7 +13,7 @@ const AdminPanel = () => {
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('tickets') || '[]');
     setTickets(stored);
-    setComisionTotal(stored.filter(t => t.verificado).length * 1250); // 5% de $25.000 = $1250
+    setComisionTotal(stored.filter(t => t.verificado).length * 1250);
   }, []);
 
   const filteredTickets = tickets.filter((t) =>
@@ -46,6 +47,7 @@ const AdminPanel = () => {
             <tr>
               <th className="text-left p-3 text-gray-600 dark:text-gray-300">Nombre</th>
               <th className="text-left p-3 text-gray-600 dark:text-gray-300">Email</th>
+              <th className="text-left p-3 text-gray-600 dark:text-gray-300">DNI</th>
               <th className="text-left p-3 text-gray-600 dark:text-gray-300">ID del Ticket</th>
               <th className="text-left p-3 text-gray-600 dark:text-gray-300">Comisión Franco (5%)</th>
               <th className="text-left p-3 text-gray-600 dark:text-gray-300">Verificación</th>
@@ -60,6 +62,7 @@ const AdminPanel = () => {
               >
                 <td className="p-3 border-b border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">{t.nombre}</td>
                 <td className="p-3 border-b border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">{t.email}</td>
+                <td className="p-3 border-b border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">{t.dni}</td>
                 <td className="p-3 border-b border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">{t.ticketId}</td>
                 <td className="p-3 border-b border-gray-200 dark:border-gray-700 text-green-700 dark:text-green-400 font-medium">$1.250</td>
                 <td className="p-3 border-b border-gray-200 dark:border-gray-700">
@@ -81,14 +84,12 @@ const AdminPanel = () => {
         </p>
       </div>
 
-      {/* Botón para volver al menú */}
       <div className="mt-6 flex justify-end">
         <Link
           to="/"
           className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg shadow transition"
         >
-          <Home size={18} />
-          Volver al Menú Principal
+          <Home size={18} /> Volver al Menú Principal
         </Link>
       </div>
     </motion.div>

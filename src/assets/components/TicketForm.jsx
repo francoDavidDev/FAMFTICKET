@@ -1,12 +1,16 @@
-// src/components/TicketForm.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 import { motion } from 'framer-motion';
+
+// 🆔 ID muy corto y legible
+const generateSimpleId = () => {
+  const rand = Math.random().toString(36).substr(2, 4).toUpperCase(); // ej: 9X4Q
+  return `TK-${rand}`;
+};
 
 const TicketForm = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ nombre: '', email: '' });
+  const [formData, setFormData] = useState({ nombre: '', email: '', dni: '' });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,7 +18,7 @@ const TicketForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const ticketId = `EVENTO-${uuidv4().slice(0, 8).toUpperCase()}`;
+    const ticketId = generateSimpleId();
     const ticketData = { ...formData, ticketId };
 
     const existing = JSON.parse(localStorage.getItem('tickets') || '[]');
@@ -41,7 +45,7 @@ const TicketForm = () => {
           type="text"
           name="nombre"
           required
-          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
           value={formData.nombre}
           onChange={handleChange}
         />
@@ -53,8 +57,20 @@ const TicketForm = () => {
           type="email"
           name="email"
           required
-          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
           value={formData.email}
+          onChange={handleChange}
+        />
+      </div>
+
+      <div>
+        <label className="block text-gray-700 dark:text-gray-300 mb-1 font-medium">DNI:</label>
+        <input
+          type="text"
+          name="dni"
+          required
+          className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+          value={formData.dni}
           onChange={handleChange}
         />
       </div>
@@ -63,7 +79,7 @@ const TicketForm = () => {
         type="submit"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg"
       >
         Comprar Entrada
       </motion.button>

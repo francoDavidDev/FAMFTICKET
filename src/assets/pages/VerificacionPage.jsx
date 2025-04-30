@@ -1,42 +1,45 @@
-// src/pages/VerificacionPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, AlertTriangle, Home, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const VerificacionPage = () => {
   const [inputId, setInputId] = useState('');
-  const [ticket, setTicket] = useState(null);
-  const [estado, setEstado] = useState(null); // 'ok', 'usado', 'invalido'
+  const [tickets, setTickets] = useState([]);
+  const [filtered, setFiltered] = useState([]);
 
-  const handleVerificar = () => {
+  useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('tickets') || '[]');
-    const encontrado = stored.find(t => t.ticketId === inputId.trim().toUpperCase());
+    setTickets(stored);
+    setFiltered(stored);
+  }, []);
 
-    if (!encontrado) {
-      setTicket(null);
-      setEstado('invalido');
-      return;
-    }
+  const handleSearch = (e) => {
+    const value = e.target.value.toUpperCase();
+    setInputId(value);
 
-    if (encontrado.verificado) {
-      setTicket(encontrado);
-      setEstado('usado');
-      return;
-    }
+    const results = tickets.filter(
+      (t) =>
+        t.ticketId?.toUpperCase().includes(value) ||
+        t.nombre?.toUpperCase().includes(value) ||
+        t.dni?.toUpperCase().includes(value)
+    );
 
-    setTicket(encontrado);
-    setEstado('ok');
+    setFiltered(results);
   };
 
-  const marcarComoVerificado = () => {
-    const stored = JSON.parse(localStorage.getItem('tickets') || '[]');
-    const index = stored.findIndex(t => t.ticketId === inputId.trim().toUpperCase());
-    if (index !== -1) {
-      stored[index].verificado = true;
-      localStorage.setItem('tickets', JSON.stringify(stored));
-      setEstado('usado');
-    }
+  const marcarComoVerificado = (ticketId) => {
+    const updated = tickets.map((t) =>
+      t.ticketId === ticketId ? { ...t, verificado: true } : t
+    );
+    localStorage.setItem('tickets', JSON.stringify(updated));
+    setTickets(updated);
+    setFiltered(updated.filter(
+      (t) =>
+        t.ticketId?.toUpperCase().includes(inputId) ||
+        t.nombre?.toUpperCase().includes(inputId) ||
+        t.dni?.toUpperCase().includes(inputId)
+    ));
   };
 
   return (
@@ -52,72 +55,69 @@ const VerificacionPage = () => {
 
       <input
         type="text"
-        placeholder="Ingresar ID del Ticket"
-        className="w-full max-w-md p-3 mb-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+        placeholder="Buscar por ID, nombre o DNI"
+        className="w-full max-w-md p-3 mb-6 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
         value={inputId}
-        onChange={(e) => setInputId(e.target.value)}
+        onChange={handleSearch}
       />
 
-      <button
-        onClick={handleVerificar}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow"
-      >
-        Verificar Ticket
-      </button>
-
-      {/* Resultado: Ticket válido */}
-      {estado === 'ok' && ticket && (
-        <div className="mt-8 p-6 bg-white dark:bg-gray-900 rounded-lg shadow-md max-w-md w-full text-center">
-          <CheckCircle className="text-green-600 mx-auto mb-2" size={40} />
-          <p className="text-lg font-semibold text-green-700 dark:text-green-400 mb-2">✅ Ticket válido</p>
-          <p><strong>Nombre:</strong> {ticket.nombre}</p>
-          <p><strong>Email:</strong> {ticket.email}</p>
-          <p><strong>ID:</strong> {ticket.ticketId}</p>
-          <button
-            onClick={marcarComoVerificado}
-            className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            Marcar como verificado
-          </button>
-        </div>
-      )}
-
-      {/* Resultado: Ticket ya verificado */}
-      {estado === 'usado' && ticket && (
-        <div className="mt-8 p-6 bg-yellow-100 dark:bg-yellow-900 rounded-lg shadow-md max-w-md w-full text-center">
-          <AlertTriangle className="text-yellow-600 mx-auto mb-2" size={40} />
-          <p className="text-lg font-semibold text-yellow-700 dark:text-yellow-300 mb-2">⚠️ Ticket ya fue verificado</p>
-          <p><strong>Nombre:</strong> {ticket.nombre}</p>
-          <p><strong>Email:</strong> {ticket.email}</p>
-          <p><strong>ID:</strong> {ticket.ticketId}</p>
-        </div>
-      )}
-
-      {/* Resultado: Ticket inválido */}
-      {estado === 'invalido' && (
-        <div className="mt-8 p-6 bg-red-100 dark:bg-red-900 rounded-lg shadow-md max-w-md w-full text-center">
-          <XCircle className="text-red-600 mx-auto mb-2" size={40} />
-          <p className="text-lg font-semibold text-red-700 dark:text-red-300">❌ Ticket no válido</p>
-          <p>No se encontró ningún ticket con ese ID.</p>
-        </div>
-      )}
+      <div className="w-full max-w-6xl overflow-x-auto rounded-lg shadow">
+        <table className="w-full table-auto border-collapse bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white">
+          <thead className="bg-gray-100 dark:bg-gray-800 text-left">
+            <tr>
+              <th className="p-3">Nombre</th>
+              <th className="p-3">Email</th>
+              <th className="p-3">DNI</th>
+              <th className="p-3">ID</th>
+              <th className="p-3">Estado</th>
+              <th className="p-3">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length > 0 ? (
+              filtered.map((ticket, idx) => (
+                <tr key={idx} className="border-t border-gray-200 dark:border-gray-700">
+                  <td className="p-3">{ticket.nombre}</td>
+                  <td className="p-3">{ticket.email}</td>
+                  <td className="p-3">{ticket.dni}</td>
+                  <td className="p-3 font-mono">{ticket.ticketId}</td>
+                  <td className="p-3">
+                    {ticket.verificado ? (
+                      <span className="text-green-500 font-medium">✅ Verificado</span>
+                    ) : (
+                      <span className="text-yellow-500 font-medium">⏳ No verificado</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {!ticket.verificado && (
+                      <button
+                        onClick={() => marcarComoVerificado(ticket.ticketId)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Verificar
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-600 dark:text-gray-300">
+                  No se encontraron tickets con ese criterio.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Botones de navegación */}
       <div className="mt-10 flex gap-4">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg shadow transition"
-        >
-          <Home size={18} />
-          Menú Principal
+        <Link to="/" className="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-5 py-2 rounded-lg shadow transition">
+          <Home size={18} /> Menú Principal
         </Link>
-
-        <Link
-          to="/admin"
-          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition"
-        >
-          <LayoutDashboard size={18} />
-          Panel del Organizador
+        <Link to="/admin" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow transition">
+          <LayoutDashboard size={18} /> Panel del Organizador
         </Link>
       </div>
     </motion.div>
